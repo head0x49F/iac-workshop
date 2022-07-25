@@ -1,0 +1,44 @@
+  - hosts: gcp-vm
+    remote_user: 
+    become: true
+    become_method: sudo
+    gather_facts: no
+
+    tasks:
+      - name: Update packages
+        ansible.builtin.apt:
+          update_cache: yes
+          name: "*"
+          state: latest
+
+      - name: Install a list of packages
+        ansible.builtin.apt:
+          pkg:
+            - docker.io
+            - docker-compose
+            - mc
+            - htop
+            - curl
+            - wget
+            - git
+
+      - name: Add "$USER" user to "docker" group
+        ansible.builtin.user:
+          name: ""
+          group: "docker"
+          append: yes
+
+      - name: Clone a github repository
+        ansible.builtin.git:
+          repo: https://github.com/head0x49F/docker-workshop.git
+          dest: /home/$USER/docker-workshop
+          clone: yes
+          update: yes
+
+      - name: Run docker-compose
+        community.docker.docker_compose:
+          project_src: /home/$USER/docker-workshop
+          files:
+          - /home/$USER/docker-workshop/docker-compose.yml     
+            
+            
